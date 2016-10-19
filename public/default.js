@@ -4,16 +4,22 @@ const myApp = angular.module('myApp', []);
 
 myApp.controller('HomeController', homeController);
 
-function homeController() {
+homeController.$inject = ['$http'];
+
+function homeController($http) {
+
   const vm = this;
   vm.message = 'Hello World';
 
-  vm.todos = [
-    {text:'Learn AngularJS', completed: true},
-    {text:'Build an App', completed: false},
-    {text:'Deploy App', completed: false}
-  ]
+  vm.todos = [];
 
+  loadTodos();
+
+  function loadTodos() {
+    $http.get('/todos').success(todos => {
+      vm.todos = todos
+    })
+  }
   vm.toggleChecked = function(todo) {
     todo.completed = !todo.completed;
     vm.remaining = tasksRemaining(vm.todos);
