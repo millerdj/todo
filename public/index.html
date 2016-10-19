@@ -8,9 +8,16 @@
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.3/css/font-awesome.min.css">
   </head>
   <body>
-    <div ng-app="myApp">
-      <div ng-controller="HomeController">
-        {{ message }}
+    <div ng-app="myApp" ng-cloak>
+      <div ng-controller="HomeController as home">
+        <h1>{{ home.message }}</h1>
+        <ul>
+          <li ng-repeat="todos in home.todos" ng-click="home.toggleChecked(todos)">
+              <input type="checkbox" ng-checked="todos.completed" />
+              <span ng-class="{ strike: todos.completed }"> {{ todos.text }}</span>
+          </li>
+        </ul>
+        <h3 ng-show="home.remaining">{{ home.remaining + ' Tasks Remaining'}}</h3>
       </div>
     </div>
 
