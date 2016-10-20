@@ -1,13 +1,30 @@
 const express = require('express');
-const bodyParser = require('body-parser');
+const { json } = require('body-parser');
+const { MongoClient } = require('mongodb');
 
-const app = express();
+
+const MONGO_URI = 'mongodb://localhost:27017/todos'
 const PORT = 3000;
 
-app.use(express.static('public'));
+MongoClient.connect(MONGO_URI, (err, db) => {
+  if (err) {
+    console.error(err);
+    process.exit(1);
+  }
 
-app.use(bodyParser.json());
+  const app = express();
 
-app.listen(PORT, () => {
-  console.log('listening on port ' + PORT);
+  app.use(express.static('public'));
+  app.use(json());
+
+  app.get('/todos', (req, res) => {
+    console.log('Fetching Todos')
+    db.collection('todos').find().toArray((err, docs) => {
+      if (err) return console.log(err)
+      res.send(docs);
+    })
+  })
+  app.listen(PORT, () => {
+    console.log('listening on port ' + PORT);
+  })
 })
