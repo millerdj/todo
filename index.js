@@ -6,12 +6,14 @@ const { MongoClient } = require('mongodb');
 const MONGO_URI = 'mongodb://localhost:27017/todos'
 const PORT = 3000;
 
+
 MongoClient.connect(MONGO_URI, (err, db) => {
   if (err) {
     console.error(err);
     process.exit(1);
   }
 
+  const todos = db.collection('todos');
   const app = express();
 
   app.use(express.static('public'));
@@ -19,11 +21,20 @@ MongoClient.connect(MONGO_URI, (err, db) => {
 
   app.get('/todos', (req, res) => {
     console.log('Fetching Todos')
-    db.collection('todos').find().toArray((err, docs) => {
-      if (err) return console.log(err)
+    todos.find().toArray((err, docs) => {
+      if (err) return res.sendStatus(500)
       res.send(docs);
     })
   })
+
+  app.post('/todos', (req, res) => {
+    console.log('Creating new task');
+    todos.insert(req.body, (err, docs) => {
+      if (err) return res.sendStatus(500)
+      res.json(docs.ops[0])
+    })
+  })
+
   app.listen(PORT, () => {
     console.log('listening on port ' + PORT);
   })
