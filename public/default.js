@@ -4,9 +4,9 @@ const myApp = angular.module('myApp', []);
 
 myApp.controller('HomeController', homeController);
 
-homeController.$inject = ['$http'];
+homeController.$inject = ['todosData'];
 
-function homeController($http) {
+function homeController(todosData) {
 
   const vm = this;
 
@@ -14,29 +14,47 @@ function homeController($http) {
   vm.todos = [];
   vm.remaining = 0;
 
-  loadTodos();
 
-  function loadTodos() {
-    $http.get('/todos').success(todos => {
-      vm.todos = todos
-      vm.remaining = tasksRemaining(vm.todos);
-    })
-  }
+  todosData.loadTodos().then(todos => {
+    vm.todos = todos
+    vm.remaining = tasksRemaining(vm.todos)
+  })
+
   vm.toggleChecked = function(todo) {
     todo.completed = !todo.completed;
     vm.remaining = tasksRemaining(vm.todos);
   }
 
-
   vm.createTodo = function(input) {
-    $http.post('/todos', {text: input, completed: false}).success(() => {
-      vm.todos.push({text: input, completed: false})
+    todosData.createTodo(input).then(todos => {
+      vm.todos.push(todos)
     })
   }
 
-
   function tasksRemaining(todos) {
     return todos.filter(todo => !todo.completed).length
+  }
+
+}
+
+myApp.factory('todosData', todosData)
+
+todosData.$inject = ['$http']
+
+function todosData($http) {
+
+  return {
+    loadTodos,
+    createTodo
+  }
+
+  function loadTodos() {
+    return $http.get('/todos').then(res => res.data)
+  }
+
+  function createTodo(input) {
+    const newTodo = {text: input, completed: false};
+    return $http.post('/todos', newTodo).then(res => res.data)
   }
 
 }
