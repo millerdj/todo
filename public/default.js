@@ -12,14 +12,14 @@ function homeController($http) {
 
   vm.message = 'Task List';
   vm.todos = [];
-
+  vm.remaining = 0;
 
   loadTodos();
 
-  vm.remaining = tasksRemaining(vm.todos);
   function loadTodos() {
     $http.get('/todos').success(todos => {
       vm.todos = todos
+      vm.remaining = tasksRemaining(vm.todos);
     })
   }
   vm.toggleChecked = function(todo) {
