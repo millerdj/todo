@@ -21,13 +21,15 @@ function homeController(todosData) {
   })
 
   vm.toggleChecked = function(todo) {
-    todo.completed = !todo.completed;
-    vm.remaining = tasksRemaining(vm.todos);
+    todosData.updateTodo(todo).then(() => {
+      todo.completed = todo.completed;
+      vm.remaining = tasksRemaining(vm.todos);
+    })
   }
 
   vm.createTodo = function(input) {
-    todosData.createTodo(input).then(todos => {
-      vm.todos.push(todos)
+    todosData.createTodo(input).then(todo => {
+      vm.todos.push(todo)
     })
   }
 
@@ -45,7 +47,8 @@ function todosData($http) {
 
   return {
     loadTodos,
-    createTodo
+    createTodo,
+    updateTodo
   }
 
   function loadTodos() {
@@ -55,6 +58,11 @@ function todosData($http) {
   function createTodo(input) {
     const newTodo = {text: input, completed: false};
     return $http.post('/todos', newTodo).then(res => res.data)
+  }
+
+  function updateTodo(todo) {
+    const newTodo = Object.assign(todo, {completed: !todo.completed})
+    return $http.put('/todos/' + newTodo._id, newTodo).then(res => res.data)
   }
 
 }
