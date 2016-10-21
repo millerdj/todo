@@ -1,6 +1,7 @@
 const express = require('express');
 const { json } = require('body-parser');
 const { MongoClient } = require('mongodb');
+const { ObjectId } = require('mongodb');
 
 
 const MONGO_URI = 'mongodb://localhost:27017/todos'
@@ -32,6 +33,23 @@ MongoClient.connect(MONGO_URI, (err, db) => {
     todos.insert(req.body, (err, docs) => {
       if (err) return res.sendStatus(500)
       res.json(docs.ops[0])
+    })
+  })
+
+  app.put('/todos/:todoId', (req, res) => {
+    console.log('Updating Task')
+    const id = {
+      _id: new ObjectId(req.params.todoId)
+    }
+    const newTodo = {
+      completed: req.body.completed
+    }
+    todos.updateOne(id, { $set: newTodo }, (err, docs) => {
+      if (err) {
+        console.error(err)
+        return res.sendStatus(500)
+      }
+      res.json(docs);
     })
   })
 
