@@ -4,9 +4,9 @@ const myApp = angular.module('myApp', []);
 
 myApp.controller('HomeController', homeController);
 
-homeController.$inject = ['todosData'];
+homeController.$inject = ['$scope', 'todosData'];
 
-function homeController(todosData) {
+function homeController($scope, todosData) {
 
   const vm = this;
 
@@ -14,16 +14,18 @@ function homeController(todosData) {
   vm.todos = [];
   vm.remaining = 0;
 
+  init()
 
-  todosData.loadTodos().then(todos => {
-    vm.todos = todos
-    vm.remaining = tasksRemaining(vm.todos)
-  })
+  function init() {
+    $scope.$watch(tasksRemaining, remaining => vm.remaining = remaining)
+    todosData
+      .loadTodos()
+      .then(todos => vm.todos = todos)
+  }
 
   vm.toggleChecked = function(todo) {
     todosData.updateTodo(todo).then(() => {
       todo.completed = todo.completed;
-      vm.remaining = tasksRemaining(vm.todos);
     })
   }
 
@@ -33,8 +35,8 @@ function homeController(todosData) {
     })
   }
 
-  function tasksRemaining(todos) {
-    return todos.filter(todo => !todo.completed).length
+  function tasksRemaining() {
+    return vm.todos.filter(todo => !todo.completed).length
   }
 
 }
